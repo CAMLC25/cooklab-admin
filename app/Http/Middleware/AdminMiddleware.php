@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
+/**
+ * Middleware kiểm tra quyền admin
+ */
+class AdminMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        // Kiểm tra nếu người dùng đã đăng nhập và có quyền admin
+        if (Auth::check() && Auth::user()->role === 'admin') {
+
+            return $next($request);
+        }
+
+        // Nếu không phải admin, chuyển hướng về trang lỗi hoặc trang chủ
+        return redirect()->route('login');
+    }
+}
