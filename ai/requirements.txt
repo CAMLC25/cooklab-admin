@@ -1,0 +1,5 @@
+fastapi
+uvicorn[standard]
+rapidfuzz
+requests
+google-generativeai==0.7.2

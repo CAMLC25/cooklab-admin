@@ -1,10 +1,14 @@
 <?php
 
+use App\Contracts\NlpAdapter;
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\RecipeController;
+use App\Http\Controllers\Ai\AiSearchController;
+use Illuminate\Http\Request;
 
 // Nhóm route API Authentication
 Route::prefix('auth')->group(function () {
@@ -46,7 +50,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Hiển thị danh sách công thức nấu ăn
 Route::get('/recipes', [RecipeController::class, 'index']);
-
+// Hiện thị công thức nấu ăn trending
+Route::get('/trending', [RecipeController::class, 'trending']);
 
 // Thả biểu tượng cảm xúc và bình luận
 Route::middleware('auth:sanctum')->prefix('recipes')->group(function () {
@@ -83,3 +88,17 @@ Route::middleware('auth:sanctum')->delete('/search-history/{userId}/{id?}', [Rec
 Route::get('users/{id}', [UserController::class, 'show']);
 Route::get('customer/{id}', [UserController::class, 'showCustomer']);
 
+/** ========== AI endpoints ========== */
+// Dump từ điển nguyên liệu cho service AI (nếu bạn vẫn dùng)
+Route::get('/ai/ingredients-dump', function () {
+    $rows = DB::table('recipe_ingredients')
+        ->selectRaw('LOWER(TRIM(name)) as name')
+        ->groupBy('name')
+        ->pluck('name');
+    return ['ok' => true, 'data' => $rows];
+});
+
+// Tìm món theo nguyên liệu/text (AI search - KHÔNG dùng LLM, chạy trực tiếp DB)
+Route::post('/ai/search', [AiSearchController::class, 'search']);
+
+Route::post('/chat', [ChatController::class, 'handle']);

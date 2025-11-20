@@ -218,6 +218,8 @@ class RecipeController extends Controller
         ]);
     }
 
+
+
     public function destroy($id)
     {
         // Kiểm tra xem công thức có tồn tại không
@@ -921,6 +923,91 @@ class RecipeController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'All search history deleted successfully.'
+        ]);
+    }
+
+    public function trending()
+    {
+        // Lấy các công thức được yêu thích nhiều nhất
+        $popularRecipes = Recipe::withCount('reactions')
+            ->orderBy('reactions_count', 'desc')
+            ->take(10)
+            ->get();
+
+
+        // Trả về dữ liệu theo định dạng mong muốn
+        $data = $popularRecipes->map(function ($recipe) {
+            return [
+                'id' => $recipe->id,
+                'user_id' => $recipe->user_id,
+                'category_id' => $recipe->category_id,
+                'title' => $recipe->title,
+                'image' => $recipe->image,
+                'description' => $recipe->description,
+                'servings' => $recipe->servings,
+                'cook_time' => $recipe->cook_time,
+                'status' => $recipe->status,
+                'reason_rejected' => $recipe->reason_rejected,
+                'created_at' => $recipe->created_at->toISOString(),
+                'updated_at' => $recipe->updated_at->toISOString(),
+                'user' => [
+                    'id' => $recipe->user->id,
+                    'name' => $recipe->user->name,
+                    'avatar' => $recipe->user->avatar,
+                    'id_cooklab' => $recipe->user->id_cooklab,
+                ],
+                'category' => [
+                    'id' => $recipe->category->id,
+                    'name' => $recipe->category->name,
+                ],
+                'ingredients' => $recipe->ingredients->map(function ($ingredient) {
+                    return [
+                        'id' => $ingredient->id,
+                        'recipe_id' => $ingredient->recipe_id,
+                        'name' => $ingredient->name
+                    ];
+                }),
+                'steps' => $recipe->steps->map(function ($step) {
+                    return [
+                        'id' => $step->id,
+                        'recipe_id' => $step->recipe_id,
+                        'step_number' => $step->step_number,
+                        'description' => $step->description,
+                        'image' => $step->image
+                    ];
+                }),
+                'reactions' => $recipe->reactions->map(function ($reaction) {
+                    return [
+                        'id' => $reaction->id,
+                        'user_id' => $reaction->user_id,
+                        'recipe_id' => $reaction->recipe_id,
+                        'type' => $reaction->type,
+                        'created_at' => $reaction->created_at->toISOString(),
+                        'updated_at' => $reaction->updated_at->toISOString(),
+                    ];
+                }),
+                'comments' => $recipe->comments->map(function ($comment) {
+                    return [
+                        'id' => $comment->id,
+                        'user_id' => $comment->user_id,
+                        'recipe_id' => $comment->recipe_id,
+                        'content' => $comment->content,
+                        'created_at' => $comment->created_at->toISOString(),
+                        'updated_at' => $comment->updated_at->toISOString(),
+                        'user' => [
+                            'id' => $comment->user->id,
+                            'name' => $comment->user->name,
+                            'avatar' => $comment->user->avatar
+                        ]
+                    ];
+                }),
+            ];
+        });
+
+
+        return response()->json([
+            'success' => true,
+            'data' => $popularRecipes
         ]);
     }
 

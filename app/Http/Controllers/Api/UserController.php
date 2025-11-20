@@ -177,9 +177,14 @@ class UserController extends Controller
             $path = 'admin-assets/images/cook_lab/avata_users/' . $fileName;
             $avatar->move(public_path('admin-assets/images/cook_lab/avata_users'), $fileName);
 
-            if ($user->avatar && file_exists(public_path($user->avatar))) {
+            if (
+                $user->avatar
+                && file_exists(public_path($user->avatar))
+                && basename($user->avatar) !== 'avatar_default.png'
+            ) {
                 @unlink(public_path($user->avatar));
             }
+
 
             $user->avatar = $path;
         } elseif (!empty($data['avatar']) && is_string($data['avatar'])) {

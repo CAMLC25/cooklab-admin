@@ -50,6 +50,10 @@ class User extends Authenticatable
         ];
     }
 
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
     /** QUAN HỆ VỚI CÁC BẢNG KHÁC **/
 
     public function recipes()
@@ -77,7 +81,7 @@ class User extends Authenticatable
         return $this->hasMany(SearchLog::class);
     }
 
-        public function followings()
+    public function followings()
     {
         return $this->hasMany(Follow::class, 'follower_id');
     }
@@ -97,11 +101,11 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'follows', 'followee_id', 'follower_id');
     }
 
-            // $user->followings → danh sách record Follow người này đã follow
+    // $user->followings → danh sách record Follow người này đã follow
 
-            // $user->followers → danh sách record Follow của những người đang follow user này
+    // $user->followers → danh sách record Follow của những người đang follow user này
 
-            // $user->followingUsers → danh sách User mà người này follow
+    // $user->followingUsers → danh sách User mà người này follow
 
-            // $user->followerUsers → danh sách User đang follow người này
+    // $user->followerUsers → danh sách User đang follow người này
 }

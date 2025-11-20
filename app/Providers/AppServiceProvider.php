@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 use Illuminate\Pagination\Paginator;
+use App\Contracts\NlpAdapter;
+use App\Services\GeminiNlpAdapter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,6 +17,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Bạn có thể thêm bất kỳ Service Provider nào khác nếu cần
+        $this->app->bind(NlpAdapter::class, GeminiNlpAdapter::class);
+        $this->app->singleton(\App\Services\GreetingResponder::class, fn() => new \App\Services\GreetingResponder());
+
     }
 
     /**

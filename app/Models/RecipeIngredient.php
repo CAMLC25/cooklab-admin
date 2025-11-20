@@ -11,6 +11,13 @@ class RecipeIngredient extends Model
         'name',
     ];
 
+    protected $casts = [
+        'recipe_id' => 'integer',
+        'name'      => 'string',
+        'created_at'=> 'datetime',
+        'updated_at'=> 'datetime',
+    ];
+
     // 🔗 Liên kết với công thức
     public function recipe()
     {

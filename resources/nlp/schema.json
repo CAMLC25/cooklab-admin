@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "required": ["ingredients", "dish_names", "constraints"],
+  "properties": {
+    "ingredients": { "type": "array", "items": { "type": "string" } },
+    "dish_names":  { "type": "array", "items": { "type": "string" } },
+    "constraints": {
+      "type": "object",
+      "required": ["avoid", "diet"],
+      "properties": {
+        "avoid": { "type": "array", "items": { "type": "string" } },
+        "diet":  { "type": "string", "enum": ["none","vegan","vegetarian","halal","kosher","gluten_free"] },
+        "time_max_min": { "type": ["integer","null"], "minimum": 1 },
+        "tools": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

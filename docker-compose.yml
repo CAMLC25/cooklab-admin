@@ -1,0 +1,77 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cooklab-php
+    container_name: cooklab-php
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+
+  web:
+    image: nginx:1.25-alpine
+    container_name: cooklab-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+      - ai
+
+  mysql:
+    image: mysql:8.0
+    container_name: cooklab-mysql
+    environment:
+      MYSQL_DATABASE: cook_lab
+      MYSQL_USER: cooklab
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5
+    platform: linux/amd64
+    container_name: cooklab-pma
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8090:80"
+    depends_on:
+      - mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: cooklab-redis
+    ports:
+      - "6379:6379"
+
+  ai:
+    build:
+      context: ./ai
+    container_name: cooklab-ai
+    environment:
+      ING_DUMP_URL: "http://web/api/ai/ingredients-dump"
+      LARAVEL_SEARCH_URL: "http://web/api/ai/search"
+      USE_GEMINI: "true"              # bật/tắt Gemini
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db_data:
